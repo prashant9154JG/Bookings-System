@@ -1,0 +1,13 @@
+.my-footer{
+    background-color: rgb(32, 32, 32);
+    color: white;
+    padding-top: 10px;
+}
+
+.my-footer > p{
+    font-size: smaller;
+}
+
+.room-image{
+    width: 50%;
+}
