@@ -11,3 +11,16 @@
 .room-image{
     width: 50%;
 }
+
+/* override alert message styles here */
+.notie-container {
+    box-shadow: none;
+}
+
+.datepicker-picker{
+    z-index: 10000;
+}
+
+.datepicker-dropdown{
+    z-index: 10000;
+}
