@@ -1,0 +1,98 @@
+{{template "base" .}}
+
+
+{{define "content"}}
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <img src="/static/images/generals-quarters.png" alt="generals-quarter image"
+                class="img-fluid img-thumbnail mx-auto d-block room-image mt-5">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <h1 class="text-center mt-5">generals-quarter</h1>
+            <p class="text-center">Your home away from home, set on majestic waters of the Atlantic Ocean, this can be
+                vacation to be remembered.</p>
+            <p class="text-center">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Impedit repellendus
+                consequatur voluptate facilis molestiae repellat cumque aliquid iste quod, in reprehenderit culpa
+                voluptatem tempora, corrupti autem ipsam beatae quos suscipit! Nam enim repellat, libero magnam quasi,
+                mollitia alias voluptatibus voluptates itaque earum beatae consequatur non id ut tempore, eveniet
+                laborum possimus ad recusandae? Hic optio ratione accusamus voluptatibus eligendi, fuga amet eum, cum
+                eveniet porro quisquam esse quod vero quia nulla! Laudantium, ipsam. Totam quia quis perspiciatis,
+                fugiat modi libero. Molestiae, quam modi eaque laboriosam sequi amet ducimus aliquam debitis sapiente
+                dolorem repellat quas, possimus, dolore magnam distinctio sint repudiandae?</p>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col text-center">
+            <a id="check-availability-button" href="#!" class="btn btn-success">Check Availability</a>
+        </div>
+    </div>
+</div>
+
+{{end}}
+
+{{define "JS"}}
+
+<script>
+    document.getElementById("check-availability-button").addEventListener("click", function () {
+        let html = `
+            <form id="check-availability-form" action="" method="post" novalidate class="needs-validation">
+                <div class="form-row">
+                    <div class="col">
+                        <div class="form-row row" id="reservation-dates-modal"">
+                                <div class=" col">
+                            <input disabled required class="form-control" type="text" name="start" id="start" autocomplete="off">
+                        </div>
+                        <div class="col">
+                            <input disabled required class="form-control" type="text" name="end" id="end" autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </form>
+            `;
+        attention.custom({
+            title: 'Choose your dates',
+            msg: html,
+
+            willOpen: () => {
+                const elem = document.getElementById("reservation-dates-modal");
+                const rp = new DateRangePicker(elem, {
+                    format: 'dd-mm-yyyy',
+                    showOnFocus: true,
+                    orientation: 'top',
+                })
+            },
+            didOpen: () => {
+                document.getElementById("start").removeAttribute("disabled");
+                document.getElementById("end").removeAttribute("disabled");
+            },
+            callback: function (result) {
+                console.log("called");
+
+                let form = document.getElementById("check-availability-form");
+                let formData = new FormData(form);
+
+                formData.append("csrf_token", `{{.CSRFToken}}`);
+
+                fetch('/search-availability-json', {
+                    method: "post",
+                    body: formData,
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data)
+                        console.log(data.ok)
+                        console.log(data.message)
+                    })
+            }
+        });
+    })
+
+</script>
+
+
+{{end}}
