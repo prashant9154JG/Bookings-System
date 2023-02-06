@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/prashant9154/Booking_System/internal/config"
 	handler "github.com/prashant9154/Booking_System/internal/handlers"
+	"github.com/prashant9154/Booking_System/internal/models"
 	"github.com/prashant9154/Booking_System/internal/render"
 )
 
@@ -19,11 +21,14 @@ var session *scs.SessionManager
 
 func main() {
 
+	// what I am going to put in the session
+	gob.Register(models.Reservation{})
+
 	// change this to true in production
 	app.InProduction = false
 
 	session = scs.New()
-	session.Lifetime = 24 * time.Hour
+	session.Lifetime = 100 * time.Hour
 	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteLaxMode
 	session.Cookie.Secure = app.InProduction
