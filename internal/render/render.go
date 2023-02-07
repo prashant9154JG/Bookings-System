@@ -2,6 +2,8 @@ package render
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -13,6 +15,8 @@ import (
 )
 
 var app *config.AppConfig
+var pathToTemplates = "./templates"
+var functions = template.FuncMap{}
 
 // NewTemplates set the config for templates package
 func NewTemplates(a *config.AppConfig) {
@@ -94,7 +98,7 @@ func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateDa
 
 // rendering template with the ADVANCED caching of templates ->
 
-func RenderTemplates(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) {
+func RenderTemplates(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) error {
 	// create a template cache
 	var tc map[string]*template.Template
 	if app.UseCache {
@@ -111,7 +115,8 @@ func RenderTemplates(w http.ResponseWriter, r *http.Request, tmpl string, td *mo
 	// get requested template from cache
 	t, ok := tc[tmpl]
 	if !ok {
-		log.Fatal("could not get template from template cache")
+		// log.Fatal("could not get template from template cache")
+		return errors.New("could not get template from template cache")
 	}
 
 	buf := new(bytes.Buffer)
@@ -121,20 +126,24 @@ func RenderTemplates(w http.ResponseWriter, r *http.Request, tmpl string, td *mo
 	err := t.Execute(buf, td)
 	if err != nil {
 		log.Println(err)
+		return err
 	}
 
 	// render the template
 	_, err = buf.WriteTo(w)
 	if err != nil {
-		log.Println(err)
+		fmt.Println("error writing template to browser", err)
+		return err
 	}
+
+	return nil
 }
 
 func CreateTemplateCache() (map[string]*template.Template, error) {
 	myCache := map[string]*template.Template{}
 
 	// get all of the files named *.page.tmpl from ./templates
-	pages, err := filepath.Glob("./templates/*.page.hbs")
+	pages, err := filepath.Glob(fmt.Sprintf("%s/*.page.hbs", pathToTemplates))
 	if err != nil {
 		return myCache, err
 	}
@@ -142,18 +151,18 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 	// range through all files ending with *.page.tmpl
 	for _, page := range pages {
 		name := filepath.Base(page)
-		ts, err := template.New(name).ParseFiles(page)
+		ts, err := template.New(name).Funcs(functions).ParseFiles(page)
 		if err != nil {
 			return myCache, err
 		}
 
-		matches, err := filepath.Glob("./templates/*.layout.hbs")
+		matches, err := filepath.Glob(fmt.Sprintf("%s/*.layout.hbs", pathToTemplates))
 		if err != nil {
 			return myCache, err
 		}
 
 		if len(matches) > 0 {
-			ts, err = ts.ParseGlob("./templates/*.layout.hbs")
+			ts, err = ts.ParseGlob(fmt.Sprintf("%s/*.layout.hbs", pathToTemplates))
 			if err != nil {
 				return myCache, err
 			}
