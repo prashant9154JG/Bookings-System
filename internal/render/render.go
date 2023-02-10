@@ -18,8 +18,8 @@ var app *config.AppConfig
 var pathToTemplates = "./templates"
 var functions = template.FuncMap{}
 
-// NewTemplates set the config for templates package
-func NewTemplates(a *config.AppConfig) {
+// NewRenderer set the config for templates package
+func NewRenderer(a *config.AppConfig) {
 	app = a
 }
 
@@ -33,7 +33,7 @@ func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateDa
 
 // render template without caching ->
 
-// func RenderTemplates(w http.ResponseWriter, hbs string) {
+// func Templates(w http.ResponseWriter, hbs string) {
 // 	parsedTemplate, _ := template.ParseFiles("./templates/"+hbs, "./templates/base.layout.hbs")
 // 	err := parsedTemplate.Execute(w, nil)
 
@@ -98,7 +98,7 @@ func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateDa
 
 // rendering template with the ADVANCED caching of templates ->
 
-func RenderTemplates(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) error {
+func Templates(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) error {
 	// create a template cache
 	var tc map[string]*template.Template
 	if app.UseCache {
